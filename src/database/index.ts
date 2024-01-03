@@ -8,4 +8,3 @@ const poolPromise = mysql.createPool({
 }).promise();
 
 export default poolPromise;
-
