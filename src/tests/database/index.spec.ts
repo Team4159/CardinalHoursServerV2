@@ -6,6 +6,7 @@ import { expect } from "chai"; // DOES NOT WORK WITH chai v5+ YET BECAUSE USING 
 
 import database from "../../database/";
 
+
 describe("SQL Database Accessor", () => {
     it("should be connected to database", async () => {
         const response: any = await database.query("SHOW STATUS WHERE `variable_name` = 'Threads_running'") // See how many threads are currently running
