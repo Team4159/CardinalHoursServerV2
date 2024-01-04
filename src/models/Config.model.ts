@@ -1,4 +1,5 @@
-import { RowDataPacket } from "mysql2";
+import { config } from "dotenv";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 import database from "../database";
 
@@ -40,25 +41,18 @@ async function createConfig(name: string, value: string): Promise<Config> {
     return configs[0];
 }
 
-async function updateConfigs(updatedConfigs: { name: string, value: string }[]): Promise<void> {
-    const sql = "INSERT INTO `config` (name, value) VALUES ? ON DUPLICATE KEY UPDATE value = VALUES (value)";
-    const params = updatedConfigs.map(updatedConfig => [ updatedConfig.name, updatedConfig.value ]);
-    await database.query<Config[]>(sql, [ params ]);
-}
-
-async function updateConfig(name: string, newValue: string): Promise<void> {
+async function updateConfig(name: string, newValue: string): Promise<boolean> {
     const sql = "UPDATE `configs` SET value = ? WHERE name = ?";
-    await database.query<Config[]>(sql, [ newValue, name ]);
+    const [ resHeader ] =  await database.query<ResultSetHeader>(sql, [ newValue, name ]);
+
+    return resHeader.affectedRows > 0;
 }
 
-async function deleteAllConfigs(): Promise<void> {
-    const sql = "TRUNCATE `configs`";
-    await database.query(sql);
-} 
+async function deleteConfig(name: string): Promise<Config> {
+    const sql = "DELETE FROM `configs` WHERE name = ? RETURNING name, value";
+    const [ configs ] = await database.query<Config[]>(sql, [ name ]);
 
-async function deleteConfig(name: string): Promise<void> {
-    const sql = "DELETE FROM `configs` WHERE name = ?";
-    await database.query(sql, [ name ]);
+    return configs[0];
 }
 
 export default Config;
@@ -67,8 +61,6 @@ export {
     getConfigByName,
     createConfigs,
     createConfig,
-    updateConfigs,
     updateConfig,
-    deleteAllConfigs,
     deleteConfig,
 }
