@@ -1,9 +1,11 @@
-require("dotenv").config()
+import dotenv from "dotenv";
+dotenv.config();
 
 import express from "express";
 
 import logger from "./utils/logger";
 import api from "./api";
+
 
 const app = express();
 

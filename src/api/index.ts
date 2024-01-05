@@ -4,6 +4,6 @@ import infoRouter from "./routes/info";
 
 const router = express.Router();
 
-router.use("/info", )
+router.use("/info", infoRouter);
 
 export default router;
