@@ -59,7 +59,7 @@ async function updateUserLastSignedIn(password: number, newValue: bigint): Promi
 
 async function deleteUser(password: number): Promise<boolean> {
     const sql = "DELETE FROM `users` WHERE password = ?";
-    const [ resHeader ] = await database.query<User[]>(sql, [ password ]);
+    const [ resHeader ] = await database.query<ResultSetHeader>(sql, [ password ]);
 
     return resHeader.affectedRows == 1;
 
