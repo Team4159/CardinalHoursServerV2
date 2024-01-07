@@ -1,4 +1,3 @@
-import { user } from "dotenv";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import database from "../database";
 
