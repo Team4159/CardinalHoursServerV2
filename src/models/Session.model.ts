@@ -29,7 +29,7 @@ async function getSessionsByPassword(password: number): Promise<Session[]> {
 }
 
 async function createSession(
- password: int,
+ password: number,
  start_time: bigint,
  amended: boolean,
  end_time?: bigint
@@ -44,7 +44,7 @@ async function createSession(
    sql = "INSERT INTO `sessions` (user_id, start_time, amended) SELECT user_id, ?, ? FROM users WHERE password = ?)";
    params = [start_time, amended, password];
  }
- const [ resHeader ] = await database.query<Session[]>(sql, params);
+ const [ resHeader ] = await database.query<ResultSetHeader>(sql, params);
 
  return resHeader.affectedRows == 1;
 }
@@ -74,7 +74,6 @@ export default Session;
 export {
  getAllSessions,
  getSessionsByPassword,
- createSessions,
  createSession,
  updateSession,
  deleteSession,
