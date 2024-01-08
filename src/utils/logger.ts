@@ -7,9 +7,9 @@ const logger = winston.createLogger({
         winston.format.json(),
         ),
     transports: [
-        new winston.transports.File({ filename: `logs/error/error_${newFileName()}.log`, level: "error" }),
-        new winston.transports.File({ filename: `logs/debug/debug_${newFileName()}.log` }),
-    ]
+        new winston.transports.File({ filename: newLogFileName("error"), level: "error" }),
+        new winston.transports.File({ filename: newLogFileName("debug") }),
+    ],
 });
 
 if (process.env.NODE_ENV !== "production" && process.env.NODE_ENV !== "testing") {
@@ -18,7 +18,17 @@ if (process.env.NODE_ENV !== "production" && process.env.NODE_ENV !== "testing")
     }));
 }
 
-function newFileName(date?: Date): string {
+function newLogFileName(type: string): string {
+    const pathSegments = [];
+    pathSegments.push("logs");
+    if (process.env.NODE_ENV === "testing") { pathSegments.push("tests") }
+    pathSegments.push(type);
+    pathSegments.push(type + "_" + dateToYYYYMMDD());
+
+    return pathSegments.join("/");
+}
+
+function dateToYYYYMMDD(date?: Date): string {
     if (!date) {
         date = new Date();
     }
@@ -26,4 +36,4 @@ function newFileName(date?: Date): string {
     return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
 }
 
-export default logger
+export default logger;
