@@ -4,3 +4,7 @@ class RowNotFoundError extends Error {
         Object.setPrototypeOf(this, RowNotFoundError.prototype);
     }
 }
+
+export {
+    RowNotFoundError,
+}

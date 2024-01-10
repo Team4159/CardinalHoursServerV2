@@ -1,7 +1,7 @@
-import { config } from "dotenv";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 import database from "../database";
+import { RowNotFoundError } from "../utils/errors";
 
 interface Config extends RowDataPacket {
     name: string;

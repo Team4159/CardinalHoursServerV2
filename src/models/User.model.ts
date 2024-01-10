@@ -1,11 +1,13 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
+
 import database from "../database";
+import { RowNotFoundError } from "../utils/errors";
 
 interface User extends RowDataPacket {
     user_id: number;
     first_name: string;
     last_name: string;
-    password: number;
+    password: string;
     signed_in: boolean;
     last_signed_in: bigint;
     total_time: bigint;
@@ -18,12 +20,23 @@ async function getAllUsers(): Promise<User[]> {
     return users;
 }
 
-async function getUserByPassword(password: number): Promise<User> {
+async function getUserById(userId: number): Promise<User> {
+    const sql = "SELECT * FROM `users` WHERE user_id = ?";
+    const [users] = await database.query<User[]>(sql, [userId]);
+
+    if (users.length < 1) {
+        throw new RowNotFoundError(`User of id: ${userId} not found in table: users`);
+    }
+
+    return users[0];
+}
+
+async function getUserByPassword(password: string): Promise<User> {
     const sql = "SELECT * FROM `users` WHERE password = ?";
     const [users] = await database.query<User[]>(sql, [password]);
 
     if (users.length < 1) {
-        throw new RowNotFoundError("User not found in table: users");
+        throw new RowNotFoundError(`User of password: ${password} not found in table: users`);
     }
 
     return users[0];
@@ -32,7 +45,7 @@ async function getUserByPassword(password: number): Promise<User> {
 async function createUser(
     first_name: string,
     last_name: string,
-    password: number
+    password: string
 ): Promise<User> {
     const sql =
         "INSERT INTO `users` (first_name, last_name, password) VALUES (?, ?, ?); SELECT user_id, first_name, last_name FROM users where password = ?";
@@ -46,7 +59,7 @@ async function createUser(
     return users[0];
 }
 
-async function updateUserTotalTime(password: number): Promise<boolean> {
+async function updateUserTotalTime(password: string): Promise<boolean> {
     const sql =
         "UPDATE users SET total_time = (SELECT SUM(CASE WHEN end_time - start_time < 43200000 THEN end_time - start_time ELSE 0 END) FROM sessions WHERE user_id = (SELECT user_id FROM users WHERE password = ?)); SELECT user_id, first_name, last_name from users where password = ?";
     const [resHeader] = await database.query<ResultSetHeader>(sql, [
@@ -58,7 +71,7 @@ async function updateUserTotalTime(password: number): Promise<boolean> {
 }
 
 async function updateUserLastSignedIn(
-    password: number,
+    password: string,
     newValue: bigint
 ): Promise<boolean> {
     const sql =
@@ -72,7 +85,7 @@ async function updateUserLastSignedIn(
     return resHeader.affectedRows == 1;
 }
 
-async function deleteUser(password: number): Promise<boolean> {
+async function deleteUserByPassword(password: string): Promise<boolean> {
     const sql = "DELETE FROM `users` WHERE password = ?";
     const [resHeader] = await database.query<ResultSetHeader>(sql, [password]);
 
@@ -82,9 +95,10 @@ async function deleteUser(password: number): Promise<boolean> {
 export default User;
 export {
     getAllUsers,
+    getUserById,
     getUserByPassword,
     createUser,
     updateUserTotalTime,
     updateUserLastSignedIn,
-    deleteUser,
+    deleteUserByPassword,
 };

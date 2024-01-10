@@ -7,7 +7,7 @@
     "rimraf": "./node_modules/rimraf/bin.js",
     "start": "nodemon app.ts",
     "build": "rimraf ./dist/ && tsc --project basic.tsconfig.json",
-    "test": "rimraf ./test/ && tsc --project test.tsconfig.json && cross-env NODE_ENV=testing mocha ./test/tests/**/*.spec.js --exit --timeout 10000"
+    "test": "rimraf ./test/ && tsc --project test.tsconfig.json && cross-env NODE_ENV=testing mocha ./test/tests/**/*.spec.js ./test/e2e/**/*.spec.js --exit --timeout 10000"
   },
   "repository": {
     "type": "git",
