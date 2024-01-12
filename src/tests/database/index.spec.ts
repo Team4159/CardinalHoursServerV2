@@ -8,7 +8,7 @@ import database from "../../database/";
 
 
 describe("SQL Database Accessor", () => {
-    it("should be connected to database", async () => {
+    it("is connected to database", async () => {
         const response: any = await database.query("SHOW STATUS WHERE `variable_name` = 'Threads_running'") // See how many threads are currently running
         const threadsRunning = response[0][0]["Value"];
 

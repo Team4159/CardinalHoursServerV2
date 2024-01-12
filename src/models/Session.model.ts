@@ -1,25 +1,29 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
-import database from "../database";
 
-interface Session extends RowDataPacket {
+import database from "../database";
+import updateBuilder from "../utils/updateBuilder";
+
+interface Session {
     session_id: number;
     user_id: number;
-    start_time: bigint;
-    end_time: bigint;
+    start_time: number;
+    end_time: number;
     amended: boolean;
 }
 
-async function getAllSessions(): Promise<Session[]> {
+interface SessionRowDataPacket extends Session, RowDataPacket {}
+
+async function getAllSessions(): Promise<SessionRowDataPacket[]> {
     const sql = "SELECT * FROM `sessions`";
-    const [sessions] = await database.query<Session[]>(sql);
+    const [sessions] = await database.query<SessionRowDataPacket[]>(sql);
 
     return sessions;
 }
 
-async function getSessionsByPassword(password: number): Promise<Session[]> {
+async function getSessionsByPassword(password: number): Promise<SessionRowDataPacket[]> {
     const sql =
         "SELECT * FROM `sessions` WHERE user_id = (SELECT user_id from users WHERE password = ? )";
-    const [sessions] = await database.query<Session[]>(sql, [password]);
+    const [sessions] = await database.query<SessionRowDataPacket[]>(sql, [password]);
 
     if (sessions.length < 1) {
         throw new RowNotFoundError(`Session not found in table: sessions`);
@@ -30,9 +34,9 @@ async function getSessionsByPassword(password: number): Promise<Session[]> {
 
 async function createSession(
     password: number,
-    start_time: bigint,
+    start_time: number,
     amended: boolean,
-    end_time?: bigint
+    end_time?: number
 ): Promise<boolean> {
     let sql: string;
     let params: any[];
@@ -48,21 +52,14 @@ async function createSession(
     }
     const [resHeader] = await database.query<ResultSetHeader>(sql, params);
 
-    return resHeader.affectedRows == 1;
+    return resHeader.affectedRows === 1;
 }
 
-async function updateSession(
-    password: number,
-    end_time: bigint
-): Promise<boolean> {
-    const sql =
-        "UPDATE `sessions` SET end_time = ? WHERE user_id = (SELECT user_id from 'users' WHERE password = ?)";
-    const [resHeader] = await database.query<ResultSetHeader>(sql, [
-        end_time,
-        password,
-    ]);
+async function updateSession(session_id: number, values: Partial<Session>): Promise<boolean> {
+    const update = updateBuilder("sessions", values, { session_id });
+    const [resHeader] = await database.query<ResultSetHeader>(update.query, update.params);
 
-    return resHeader.affectedRows == 1;
+    return resHeader.affectedRows === 1;
 }
 
 async function deleteSession(session_id: number): Promise<boolean> {
@@ -71,7 +68,7 @@ async function deleteSession(session_id: number): Promise<boolean> {
         session_id,
     ]);
 
-    return resHeader.affectedRows == 1;
+    return resHeader.affectedRows === 1;
 }
 
 async function deleteSessionsByUserPassword(
