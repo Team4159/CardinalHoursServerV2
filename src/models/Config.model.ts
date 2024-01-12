@@ -1,6 +1,7 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 import database from "../database";
+import { RowNotFoundError } from "../utils/errors";
 
 interface Config {
     name: string;
@@ -21,7 +22,7 @@ async function getConfigByName(name: string): Promise<Config> {
     const [configs] = await database.query<ConfigRowDataPacket[]>(sql, [name]);
 
     if (configs.length < 1) {
-        throw new RowNotFoundError("Config not found in table: configs");
+        throw new RowNotFoundError("Config not found in table: configs!");
     }
 
     return configs[0];

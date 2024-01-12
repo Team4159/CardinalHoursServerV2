@@ -1,8 +1,9 @@
 import express from "express";
 
 import User, { getUserByPassword, updateUser } from "../../models/User.model";
-import { createSession, getSessionsByUserId } from "../../models/Session.model";
+import { createSession, getSessionsByUserId, updateSession } from "../../models/Session.model";
 import Time, { isOverlappingPreviousTimes } from "../../utils/time";
+import { InvalidTimeError, RowNotFoundError } from "../../utils/errors";
 
 const router = express.Router();
 
@@ -114,7 +115,59 @@ router.post("/session", async (req, res) => {
     );
 
     return res.status(200).json({
-        description: "Amended new session",
+        description: "Amended new session!",
+    });
+});
+
+router.patch("/session", async (req, res) => {
+    const user: User = res.locals.user;
+
+    if (!req.body.start_time || !req.body.end_time || !req.body.session_id) {
+        return res.status(400).json({
+            description: "Missing start and/or end times!",
+        });
+    }
+
+    let editedSessionTime: Time;
+
+    try {
+        editedSessionTime = new Time(req.body.start_time, req.body.end_time);
+    } catch (err) {
+        if (err instanceof InvalidTimeError) {
+            return res.status(400).json({
+                description: "Start time must be less than end time!",
+            });
+        }
+
+        throw err;
+    }
+
+    const previousSessions = await getSessionsByUserId(user.user_id);
+    let previousSessionTimes: Time[] = [];
+
+    for (const session of previousSessions) {
+        if (session.session_id === req.body.session_id) {
+            continue;
+        }
+
+        previousSessionTimes.push(
+            new Time(session.start_time, session.end_time)
+        );
+    }
+
+    if (isOverlappingPreviousTimes(editedSessionTime, previousSessionTimes)) {
+        return res.status(400).json({
+            description: "Edited session overlaps with existing session!",
+        });
+    }
+
+    await updateSession(req.body.session_id, {
+        start_time: editedSessionTime.startTime,
+        end_time: editedSessionTime.endTime,
+    });
+
+    return res.status(200).json({
+        description: "Edited session!",
     });
 });
 

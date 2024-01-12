@@ -1,5 +1,6 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import database from "../database";
+import { RowNotFoundError } from "../utils/errors";
 import updateBuilder from "../utils/updateBuilder";
 
 interface User {
@@ -26,7 +27,7 @@ async function getUserByPassword(password: number): Promise<User> {
     const [users] = await database.query<UserRowDataPacket[]>(sql, [password]);
 
     if (users.length < 1) {
-        throw new RowNotFoundError("User not found in table: users");
+        throw new RowNotFoundError("User not found in table: users!");
     }
 
     return users[0];

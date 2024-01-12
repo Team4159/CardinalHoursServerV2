@@ -1,4 +1,7 @@
 // Read only class that stores start and end times
+
+import { InvalidTimeError } from "./errors";
+
 // End time must be greater than start time
 class Time {
     readonly startTime: number;

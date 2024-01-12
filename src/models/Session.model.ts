@@ -1,6 +1,7 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 import database from "../database";
+import { RowNotFoundError } from "../utils/errors";
 import updateBuilder from "../utils/updateBuilder";
 
 interface Session {
@@ -29,7 +30,7 @@ async function getSessionsByUserId(
     ]);
 
     if (sessions.length < 1) {
-        throw new RowNotFoundError("Session not found in table: sessions");
+        throw new RowNotFoundError("Session not found in table: sessions!");
     }
 
     return sessions;
