@@ -33,23 +33,15 @@ async function getSessionsByPassword(password: number): Promise<SessionRowDataPa
 }
 
 async function createSession(
-    password: number,
+    user_id: number,
     start_time: number,
+    end_time: number,
     amended: boolean,
-    end_time?: number
 ): Promise<boolean> {
-    let sql: string;
-    let params: any[];
+    const sql =
+        "INSERT INTO `sessions` (user_id, start_time, end_time, amended) SELECT user_id, ?, ?, ? FROM users WHERE user_id = ?)";
+    const params = [start_time, end_time, amended, user_id];
 
-    if (amended) {
-        sql =
-            "INSERT INTO `sessions` (user_id, start_time, end_time, amended) SELECT user_id, ?, ?, ? FROM users WHERE password = ?)";
-        params = [start_time, end_time, amended, password];
-    } else {
-        sql =
-            "INSERT INTO `sessions` (user_id, start_time, amended) SELECT user_id, ?, ? FROM users WHERE password = ?)";
-        params = [start_time, amended, password];
-    }
     const [resHeader] = await database.query<ResultSetHeader>(sql, params);
 
     return resHeader.affectedRows === 1;

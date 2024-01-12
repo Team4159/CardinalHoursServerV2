@@ -48,6 +48,21 @@ router.post("/sign-in", async (_req, res) => {
     });
 });
 
+router.post("/sign-out", async (req, res) => {
+    const user: User = res.locals.user;
 
+    if (!user.signed_in) {
+        return res.status(400).json({
+            description: `${user.first_name} ${user.last_name} is not signed in!`,
+        });
+    }
+
+    await updateUser(user.user_id, { signed_in: false });
+    await createSession(user.user_id, user.last_signed_in, Date.now(), false);
+
+    return res.status(200).json({
+        description: `Signed out as ${user.first_name} ${user.last_name}`
+    });
+});
 
 export default router;
