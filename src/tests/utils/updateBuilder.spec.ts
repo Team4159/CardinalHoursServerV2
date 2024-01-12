@@ -2,14 +2,13 @@ import { expect } from "chai";
 
 import updateBuilder from "../../utils/updateBuilder";
 
-
 describe("SQL Update Query Builder", () => {
     it("returns full prepared statement given table, updates, and conditions", () => {
         const table = "users";
         const updates = {
             first_name: "fod",
             last_name: "bart",
-            bool_test: true
+            bool_test: true,
         };
         const conditions = {
             user_id: 2,

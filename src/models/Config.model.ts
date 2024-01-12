@@ -21,9 +21,7 @@ async function getConfigByName(name: string): Promise<Config> {
     const [configs] = await database.query<ConfigRowDataPacket[]>(sql, [name]);
 
     if (configs.length < 1) {
-        throw new RowNotFoundError(
-            `Row of name: ${name} not found in table: configs`
-        );
+        throw new RowNotFoundError("Config not found in table: configs");
     }
 
     return configs[0];

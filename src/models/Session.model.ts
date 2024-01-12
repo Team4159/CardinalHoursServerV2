@@ -20,13 +20,16 @@ async function getAllSessions(): Promise<SessionRowDataPacket[]> {
     return sessions;
 }
 
-async function getSessionsByPassword(password: number): Promise<SessionRowDataPacket[]> {
-    const sql =
-        "SELECT * FROM `sessions` WHERE user_id = (SELECT user_id from users WHERE password = ? )";
-    const [sessions] = await database.query<SessionRowDataPacket[]>(sql, [password]);
+async function getSessionsByUserId(
+    user_id: number
+): Promise<SessionRowDataPacket[]> {
+    const sql = "SELECT * FROM `sessions` WHERE user_id = ?";
+    const [sessions] = await database.query<SessionRowDataPacket[]>(sql, [
+        user_id,
+    ]);
 
     if (sessions.length < 1) {
-        throw new RowNotFoundError(`Session not found in table: sessions`);
+        throw new RowNotFoundError("Session not found in table: sessions");
     }
 
     return sessions;
@@ -36,7 +39,7 @@ async function createSession(
     user_id: number,
     start_time: number,
     end_time: number,
-    amended: boolean,
+    amended: boolean
 ): Promise<boolean> {
     const sql =
         "INSERT INTO `sessions` (user_id, start_time, end_time, amended) SELECT user_id, ?, ?, ? FROM users WHERE user_id = ?)";
@@ -47,9 +50,15 @@ async function createSession(
     return resHeader.affectedRows === 1;
 }
 
-async function updateSession(session_id: number, values: Partial<Session>): Promise<boolean> {
+async function updateSession(
+    session_id: number,
+    values: Partial<Session>
+): Promise<boolean> {
     const update = updateBuilder("sessions", values, { session_id });
-    const [resHeader] = await database.query<ResultSetHeader>(update.query, update.params);
+    const [resHeader] = await database.query<ResultSetHeader>(
+        update.query,
+        update.params
+    );
 
     return resHeader.affectedRows === 1;
 }
@@ -76,7 +85,7 @@ async function deleteSessionsByUserPassword(
 export default Session;
 export {
     getAllSessions,
-    getSessionsByPassword,
+    getSessionsByUserId,
     createSession,
     updateSession,
     deleteSession,

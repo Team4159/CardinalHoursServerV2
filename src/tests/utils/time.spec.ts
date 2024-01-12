@@ -1,5 +1,8 @@
 import { expect } from "chai";
-import Time, { hasTimeOverlap, isOverlappingPreviousTimes } from "../../utils/time";
+import Time, {
+    hasTimeOverlap,
+    isOverlappingPreviousTimes,
+} from "../../utils/time";
 
 describe("Session Time Keeping", () => {
     describe("Time class", () => {
@@ -54,7 +57,7 @@ describe("Session Time Keeping", () => {
                 [2585377374694, 3200074115562], // newTime overlaps here
                 [4563239274958, 5626207844334],
             ];
-            
+
             let previousTimes: Time[] = [];
             for (const time of previousTimesList) {
                 previousTimes.push(new Time(time[0], time[1]));
@@ -73,7 +76,7 @@ describe("Session Time Keeping", () => {
                 [6032718394107, 7369514770039],
                 [8363323829637, 9854743210146],
             ];
-            
+
             let previousTimes: Time[] = [];
             for (const time of previousTimesList) {
                 previousTimes.push(new Time(time[0], time[1]));
