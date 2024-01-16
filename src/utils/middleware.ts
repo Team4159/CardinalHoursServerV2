@@ -4,7 +4,7 @@ import logger from "./logger";
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     if (err instanceof CustomError && !!err.statusCode) {
-        logger.warn(err.message)
+        logger.warn(err.message);
         return res.status(err.statusCode).json({
             description: err.message,
         });

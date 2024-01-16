@@ -1,7 +1,7 @@
 import express from "express";
 
 import User, { getUserByPassword, updateUser } from "../../models/User.model";
-import { createSession, getSessionsByUserId, updateSession } from "../../models/Session.model";
+import { createSession, deleteSession, getSessionsByUserId, updateSession } from "../../models/Session.model";
 import Time, { isOverlappingPreviousTimes } from "../../utils/time";
 import { InvalidTimeError, RowNotFoundError } from "../../utils/errors";
 
@@ -124,7 +124,7 @@ router.patch("/session", async (req, res) => {
 
     if (!req.body.start_time || !req.body.end_time || !req.body.session_id) {
         return res.status(400).json({
-            description: "Missing start and/or end times!",
+            description: "Missing session ID and/or start times and/or end times!",
         });
     }
 
@@ -168,6 +168,28 @@ router.patch("/session", async (req, res) => {
 
     return res.status(200).json({
         description: "Edited session!",
+    });
+});
+
+router.delete("/session", async (req, res) => {
+    const user: User = res.locals.user;
+
+    if (!req.body.start_time || !req.body.end_time || !req.body.session_id) {
+        return res.status(400).json({
+            description: "Missing session ID!",
+        });
+    }
+
+    const deleted = await deleteSession(req.body.session_id);
+
+    if (!deleted) {
+        return res.status(400).json({
+            description: "Could not delete session!",
+        })
+    }
+
+    return res.status(200).json({
+        description: "Deleted session!",
     });
 });
 
