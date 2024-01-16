@@ -23,17 +23,17 @@ function newLogFileName(type: string): string {
     pathSegments.push("logs");
     if (process.env.NODE_ENV === "testing") { pathSegments.push("tests") }
     pathSegments.push(type);
-    pathSegments.push(type + "_" + dateToYYYYMMDD());
+    pathSegments.push(type + "_" + dateToTimestamp());
 
-    return pathSegments.join("/");
+    return pathSegments.join("/") + ".log";
 }
 
-function dateToYYYYMMDD(date?: Date): string {
+function dateToTimestamp(date?: Date): string {
     if (!date) {
         date = new Date();
     }
 
-    return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
+    return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate() + "-" + date.getTime();
 }
 
 export default logger;

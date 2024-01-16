@@ -1,5 +1,7 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
+
 import database from "../database";
+import { RowNotFoundError } from "../utils/errors";
 
 interface Session extends RowDataPacket {
     session_id: number;
