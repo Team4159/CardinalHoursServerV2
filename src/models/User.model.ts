@@ -14,7 +14,7 @@ interface User {
     total_time: number;
 }
 
-interface UserRowDataPacket extends User, RowDataPacket {};
+interface UserRowDataPacket extends User, RowDataPacket {}
 
 async function getAllUsers(): Promise<UserRowDataPacket[]> {
     const sql = "SELECT * FROM `users`";
@@ -25,10 +25,12 @@ async function getAllUsers(): Promise<UserRowDataPacket[]> {
 
 async function getUserById(userId: number): Promise<User> {
     const sql = "SELECT * FROM `users` WHERE user_id = ?";
-    const [users] = await database.query<User[]>(sql, [userId]);
+    const [users] = await database.query<UserRowDataPacket[]>(sql, [userId]);
 
     if (users.length < 1) {
-        throw new RowNotFoundError(`User of id: ${userId} not found in table: users`);
+        throw new RowNotFoundError(
+            `User of id: ${userId} not found in table: users`
+        );
     }
 
     return users[0];
@@ -62,9 +64,15 @@ async function createUser(
     return users[0];
 }
 
-async function updateUser(user_id: number, values: Partial<User>): Promise<boolean> {
+async function updateUser(
+    user_id: number,
+    values: Partial<User>
+): Promise<boolean> {
     const update = updateBuilder("users", values, { user_id });
-    const [resHeader] = await database.query<ResultSetHeader>(update.query, update.params);
+    const [resHeader] = await database.query<ResultSetHeader>(
+        update.query,
+        update.params
+    );
 
     return resHeader.affectedRows === 1;
 }

@@ -14,16 +14,14 @@ interface Session {
 
 interface SessionRowDataPacket extends Session, RowDataPacket {}
 
-async function getAllSessions(): Promise<SessionRowDataPacket[]> {
+async function getAllSessions(): Promise<Session[]> {
     const sql = "SELECT * FROM `sessions`";
     const [sessions] = await database.query<SessionRowDataPacket[]>(sql);
 
     return sessions;
 }
 
-async function getSessionsByUserId(
-    user_id: number
-): Promise<SessionRowDataPacket[]> {
+async function getSessionsByUserId(user_id: number): Promise<Session[]> {
     const sql = "SELECT * FROM `sessions` WHERE user_id = ?";
     const [sessions] = await database.query<SessionRowDataPacket[]>(sql, [
         user_id,

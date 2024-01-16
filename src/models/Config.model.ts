@@ -10,7 +10,7 @@ interface Config {
 
 interface ConfigRowDataPacket extends Config, RowDataPacket {}
 
-async function getAllConfigs(): Promise<ConfigRowDataPacket[]> {
+async function getAllConfigs(): Promise<Config[]> {
     const sql = "SELECT * FROM `configs`";
     const [configs] = await database.query<ConfigRowDataPacket[]>(sql);
 
@@ -30,7 +30,7 @@ async function getConfigByName(name: string): Promise<Config> {
 
 async function createConfigs(
     newConfigs: { name: string; value: string }[]
-): Promise<ConfigRowDataPacket[]> {
+): Promise<Config[]> {
     const sql =
         "INSERT INTO `configs` (name, value) VALUES ? RETURNING name, value";
     const params = newConfigs.map((newConfig) => [
