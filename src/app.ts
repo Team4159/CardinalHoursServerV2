@@ -12,6 +12,7 @@ const app = express();
 
 app.use(middleware.json);
 app.use(middleware.errorHandler);
+
 app.use("/api/v1", api);
 
 app.listen(process.env.PORT, () => {

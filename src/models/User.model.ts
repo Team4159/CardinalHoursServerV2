@@ -1,4 +1,5 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
+
 import database from "../database";
 import { RowNotFoundError } from "../utils/errors";
 import updateBuilder from "../utils/updateBuilder";
@@ -7,7 +8,7 @@ interface User {
     user_id: number;
     first_name: string;
     last_name: string;
-    password: number;
+    password: string;
     signed_in: boolean;
     last_signed_in: number;
     total_time: number;
@@ -22,7 +23,18 @@ async function getAllUsers(): Promise<UserRowDataPacket[]> {
     return users;
 }
 
-async function getUserByPassword(password: number): Promise<User> {
+async function getUserById(userId: number): Promise<User> {
+    const sql = "SELECT * FROM `users` WHERE user_id = ?";
+    const [users] = await database.query<User[]>(sql, [userId]);
+
+    if (users.length < 1) {
+        throw new RowNotFoundError(`User of id: ${userId} not found in table: users`);
+    }
+
+    return users[0];
+}
+
+async function getUserByPassword(password: string): Promise<User> {
     const sql = "SELECT * FROM `users` WHERE password = ?";
     const [users] = await database.query<UserRowDataPacket[]>(sql, [password]);
 
@@ -36,7 +48,7 @@ async function getUserByPassword(password: number): Promise<User> {
 async function createUser(
     first_name: string,
     last_name: string,
-    password: number
+    password: string
 ): Promise<User> {
     const sql =
         "INSERT INTO `users` (first_name, last_name, password) VALUES (?, ?, ?); SELECT user_id, first_name, last_name FROM users where password = ?";
@@ -67,6 +79,7 @@ async function deleteUser(password: number): Promise<boolean> {
 export default User;
 export {
     getAllUsers,
+    getUserById,
     getUserByPassword,
     createUser,
     updateUser,
