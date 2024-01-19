@@ -29,7 +29,7 @@ async function getUserById(userId: number): Promise<User> {
 
     if (users.length < 1) {
         throw new RowNotFoundError(
-            `User of id: ${userId} not found in table: users`
+            `User of ID: ${userId} not found in table: users`
         );
     }
 
