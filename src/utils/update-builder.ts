@@ -11,14 +11,11 @@ function updateBuilder(table: string, updates: { [key: string]: any }, condition
         });
     }
 
-    let query = "UPDATE ? SET ?"
-    let params = [
-        table,
-        updateList.join(", "),
-    ];
+    let query = "UPDATE ? SET ?";
+    let params = [table, updateList.join(", ")];
 
     if (conditionList.length > 0) {
-        query += " WHERE ?"
+        query += " WHERE ?";
         params.push(conditionList.join(" AND "));
     }
 
