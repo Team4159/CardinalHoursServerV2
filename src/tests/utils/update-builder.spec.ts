@@ -1,6 +1,6 @@
 import { expect } from "chai";
 
-import updateBuilder from "../../utils/updateBuilder";
+import updateBuilder from "../../utils/update-builder";
 
 describe("SQL Update Query Builder", () => {
     it("returns full prepared statement given table, updates, and conditions", () => {

@@ -2,7 +2,7 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 import database from "../database";
 import { RowNotFoundError } from "../utils/errors";
-import updateBuilder from "../utils/updateBuilder";
+import updateBuilder from "../utils/update-builder";
 
 interface Session {
     session_id: number;
