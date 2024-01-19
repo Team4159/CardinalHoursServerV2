@@ -7,7 +7,7 @@
     "rimraf": "./node_modules/rimraf/bin.js",
     "start": "npm run build && node ./dist/app.js",
     "build": "rimraf ./dist/ && tsc --project basic.tsconfig.json",
-    "test": "rimraf ./test/ && tsc --project test.tsconfig.json && cross-env NODE_ENV=testing mocha ./test/tests/**/*.spec.js ./test/e2e/**/*.spec.js --exit --timeout 10000"
+    "test": "rimraf ./test/ && tsc --project test.tsconfig.json && cross-env NODE_ENV=testing mocha ./test/tests/**/*.spec.js ./test/e2e/**/*.e2e-spec.js --exit --timeout 10000"
   },
   "repository": {
     "type": "git",
@@ -20,12 +20,15 @@
   },
   "homepage": "https://github.com/Team4159/CardinalHoursServerV2#readme",
   "devDependencies": {
+    "@faker-js/faker": "^8.3.1",
     "@types/chai": "^4.3.11",
     "@types/express": "^4.17.21",
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.10.6",
+    "@types/supertest": "^6.0.2",
     "chai": "^4.3.10",
     "mocha": "^10.2.0",
+    "supertest": "^6.3.4",
     "typescript": "^5.3.3"
   },
   "dependencies": {
