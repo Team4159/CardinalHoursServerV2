@@ -24,7 +24,7 @@ describe("Info Routes", () => {
 
     describe("/api/v1/info/users", () => {
         describe("GET request", () => {
-            it("should return all users when database is not empty", () => {
+            it("should return all users", () => {
                 request(app)
                     .get("/api/v1/info/users")
                     .set("Accept", "application/json")

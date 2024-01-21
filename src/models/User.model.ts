@@ -77,7 +77,7 @@ async function updateUser(
     return resHeader.affectedRows === 1;
 }
 
-async function deleteUser(password: number): Promise<boolean> {
+async function deleteUserByPassword(password: number): Promise<boolean> {
     const sql = "DELETE FROM `users` WHERE password = ?";
     const [resHeader] = await database.query<ResultSetHeader>(sql, [password]);
 
@@ -91,5 +91,5 @@ export {
     getUserByPassword,
     createUser,
     updateUser,
-    deleteUser,
+    deleteUserByPassword,
 };

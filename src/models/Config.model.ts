@@ -29,7 +29,7 @@ async function getConfigByName(name: string): Promise<Config> {
 }
 
 async function createConfigs(
-    newConfigs: { name: string; value: string }[]
+    newConfigs: Config[]
 ): Promise<Config[]> {
     const sql =
         "INSERT INTO `configs` (name, value) VALUES ? RETURNING name, value";
@@ -65,7 +65,7 @@ async function updateConfig(name: string, newValue: string): Promise<boolean> {
     return resHeader.affectedRows > 0;
 }
 
-async function deleteConfig(name: string): Promise<Config> {
+async function deleteConfigByName(name: string): Promise<Config> {
     const sql = "DELETE FROM `configs` WHERE name = ? RETURNING name, value";
     const [configs] = await database.query<ConfigRowDataPacket[]>(sql, [name]);
 
@@ -79,5 +79,5 @@ export {
     createConfigs,
     createConfig,
     updateConfig,
-    deleteConfig,
+    deleteConfigByName,
 };

@@ -1,7 +1,7 @@
 import express from "express";
 
 import User, { getUserByPassword, updateUser } from "../../models/User.model";
-import { createSession, deleteSession, getSessionsByUserId, updateSession } from "../../models/Session.model";
+import { createSession, deleteSessionBySessionId, doesSessionExist, getSessionBySessionId, getSessionsByUserId, updateSession } from "../../models/Session.model";
 import Time, { isOverlappingPreviousTimes } from "../../utils/time";
 import { InvalidTimeError, RowNotFoundError } from "../../utils/errors";
 
@@ -69,6 +69,8 @@ router.post("/sign-out", async (_req, res) => {
     });
 });
 
+// TODO: ADD GET SESSIONS AND GET SESSION
+
 router.post("/session", async (req, res) => {
     const user: User = res.locals.user;
 
@@ -122,7 +124,7 @@ router.post("/session", async (req, res) => {
 router.patch("/session", async (req, res) => {
     const user: User = res.locals.user;
 
-    if (!req.body.start_time || !req.body.end_time || !req.body.session_id) {
+    if (!req.body.session_id || (!req.body.start_time && !req.body.end_time)) {
         return res.status(400).json({
             description: "Missing session ID and/or start times and/or end times!",
         });
@@ -172,18 +174,22 @@ router.patch("/session", async (req, res) => {
 });
 
 router.delete("/session", async (req, res) => {
-    const user: User = res.locals.user;
-
-    if (!req.body.start_time || !req.body.end_time || !req.body.session_id) {
+    if (!req.body.session_id) {
         return res.status(400).json({
             description: "Missing session ID!",
         });
     }
 
-    const deleted = await deleteSession(req.body.session_id);
-
-    if (!deleted) {
+    if (!doesSessionExist(req.body.session_id)) {
         return res.status(400).json({
+            description: "Session does not exist!",
+        });
+    }
+
+    const deleted = await deleteSessionBySessionId(req.body.session_id);
+
+    if (!deleted) { // Should never happen
+        return res.status(500).json({
             description: "Could not delete session!",
         })
     }
