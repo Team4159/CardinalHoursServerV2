@@ -1,6 +1,6 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
-import database from "../database";
+import db from "../database";
 import { RowNotFoundError } from "../utils/errors";
 import updateBuilder from "../utils/update-builder";
 
@@ -18,14 +18,14 @@ interface UserRowDataPacket extends User, RowDataPacket {}
 
 async function getAllUsers(): Promise<UserRowDataPacket[]> {
     const sql = "SELECT * FROM `users`";
-    const [users] = await database.query<UserRowDataPacket[]>(sql);
+    const [users] = await db.query<UserRowDataPacket[]>(sql);
 
     return users;
 }
 
 async function getUserById(userId: number): Promise<User> {
     const sql = "SELECT * FROM `users` WHERE user_id = ?";
-    const [users] = await database.query<UserRowDataPacket[]>(sql, [userId]);
+    const [users] = await db.query<UserRowDataPacket[]>(sql, [userId]);
 
     if (users.length < 1) {
         throw new RowNotFoundError(
@@ -38,7 +38,7 @@ async function getUserById(userId: number): Promise<User> {
 
 async function getUserByPassword(password: string): Promise<User> {
     const sql = "SELECT * FROM `users` WHERE password = ?";
-    const [users] = await database.query<UserRowDataPacket[]>(sql, [password]);
+    const [users] = await db.query<UserRowDataPacket[]>(sql, [password]);
 
     if (users.length < 1) {
         throw new RowNotFoundError("User not found in table: users!");
@@ -54,7 +54,7 @@ async function createUser(
 ): Promise<User> {
     const sql =
         "INSERT INTO `users` (first_name, last_name, password) VALUES (?, ?, ?); SELECT user_id, first_name, last_name FROM users where password = ?";
-    const [users] = await database.query<UserRowDataPacket[]>(sql, [
+    const [users] = await db.query<UserRowDataPacket[]>(sql, [
         first_name,
         last_name,
         password,
@@ -69,7 +69,7 @@ async function updateUser(
     values: Partial<User>
 ): Promise<boolean> {
     const update = updateBuilder("users", values, { user_id });
-    const [resHeader] = await database.query<ResultSetHeader>(
+    const [resHeader] = await db.query<ResultSetHeader>(
         update.query,
         update.params
     );
@@ -79,7 +79,7 @@ async function updateUser(
 
 async function deleteUserByPassword(password: number): Promise<boolean> {
     const sql = "DELETE FROM `users` WHERE password = ?";
-    const [resHeader] = await database.query<ResultSetHeader>(sql, [password]);
+    const [resHeader] = await db.query<ResultSetHeader>(sql, [password]);
 
     return resHeader.affectedRows === 1;
 }

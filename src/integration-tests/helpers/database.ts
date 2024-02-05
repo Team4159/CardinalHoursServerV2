@@ -7,7 +7,7 @@ import fakeUsers from "../data/fakeUsers";
 async function setupDatabase() {
     await db.query(`
                 CREATE TABLE users (
-                    user_id INT(11) PRIMARY KEY,
+                    user_id INT(11) PRIMARY KEY AUTO_INCREMENT,
                     first_name VARCHAR(200) NOT NULL,
                     last_name VARCHAR(200) NOT NULL,
                     password VARCHAR(200) UNIQUE NOT NULL,
@@ -19,7 +19,7 @@ async function setupDatabase() {
 
     await db.query(`
                 CREATE TABLE sessions (
-                    session_id INT(11) PRIMARY KEY,
+                    session_id INT(11) PRIMARY KEY AUTO_INCREMENT,
                     user_id INT(11),
                     CONSTRAINT fk_session_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
                     start_time BIGINT(20) NOT NULL,

@@ -15,14 +15,14 @@ router.use(async (req, res, next) => {
         });
     }
 
-    let user;
+    let user: User;
 
     try {
         user = await getUserByPassword(req.body.password);
     } catch (err) {
         if (err instanceof RowNotFoundError) {
             return res.status(403).json({
-                description: err.message,
+                description: "Invalid password!",
             });
         }
 
@@ -124,9 +124,9 @@ router.post("/session", async (req, res) => {
 router.patch("/session", async (req, res) => {
     const user: User = res.locals.user;
 
-    if (!req.body.session_id || (!req.body.start_time && !req.body.end_time)) {
+    if (!req.body.session_id || !req.body.start_time || !req.body.end_time) {
         return res.status(400).json({
-            description: "Missing session ID and/or start times and/or end times!",
+            description: "Missing session ID and/or start time and/or end time!",
         });
     }
 
@@ -180,9 +180,15 @@ router.delete("/session", async (req, res) => {
         });
     }
 
-    if (!doesSessionExist(req.body.session_id)) {
+    if (!(await doesSessionExist(req.body.session_id))) {
         return res.status(400).json({
             description: "Session does not exist!",
+        });
+    }
+
+    if ((await getSessionBySessionId(req.body.session_id)).user_id !== res.locals.user.user_id) {
+        return res.status(403).json({
+            description: "Cannot delete session by other user!",
         });
     }
 

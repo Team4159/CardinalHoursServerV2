@@ -8,7 +8,7 @@ class Time {
     readonly endTime: number;
 
     constructor(startTime: number, endTime: number) {
-        if (endTime < startTime) {
+        if (endTime <= startTime) {
             throw new InvalidTimeError(
                 "End time must be greater than start time"
             );

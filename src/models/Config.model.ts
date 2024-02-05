@@ -1,6 +1,6 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
-import database from "../database";
+import db from "../database";
 import { RowNotFoundError } from "../utils/errors";
 
 interface Config {
@@ -12,14 +12,14 @@ interface ConfigRowDataPacket extends Config, RowDataPacket {}
 
 async function getAllConfigs(): Promise<Config[]> {
     const sql = "SELECT * FROM `configs`";
-    const [configs] = await database.query<ConfigRowDataPacket[]>(sql);
+    const [configs] = await db.query<ConfigRowDataPacket[]>(sql);
 
     return configs;
 }
 
 async function getConfigByName(name: string): Promise<Config> {
     const sql = "SELECT * FROM `configs` WHERE name = ?";
-    const [configs] = await database.query<ConfigRowDataPacket[]>(sql, [name]);
+    const [configs] = await db.query<ConfigRowDataPacket[]>(sql, [name]);
 
     if (configs.length < 1) {
         throw new RowNotFoundError("Config not found in table: configs!");
@@ -37,7 +37,7 @@ async function createConfigs(
         newConfig.name,
         newConfig.value,
     ]);
-    const [configs] = await database.query<ConfigRowDataPacket[]>(sql, [
+    const [configs] = await db.query<ConfigRowDataPacket[]>(sql, [
         params,
     ]);
 
@@ -47,7 +47,7 @@ async function createConfigs(
 async function createConfig(name: string, value: string): Promise<Config> {
     const sql =
         "INSERT INTO `configs` (name, value) VALUES (?, ?) RETURNING name, value";
-    const [configs] = await database.query<ConfigRowDataPacket[]>(sql, [
+    const [configs] = await db.query<ConfigRowDataPacket[]>(sql, [
         name,
         value,
     ]);
@@ -57,7 +57,7 @@ async function createConfig(name: string, value: string): Promise<Config> {
 
 async function updateConfig(name: string, newValue: string): Promise<boolean> {
     const sql = "UPDATE `configs` SET value = ? WHERE name = ?";
-    const [resHeader] = await database.query<ResultSetHeader>(sql, [
+    const [resHeader] = await db.query<ResultSetHeader>(sql, [
         newValue,
         name,
     ]);
@@ -67,7 +67,7 @@ async function updateConfig(name: string, newValue: string): Promise<boolean> {
 
 async function deleteConfigByName(name: string): Promise<Config> {
     const sql = "DELETE FROM `configs` WHERE name = ? RETURNING name, value";
-    const [configs] = await database.query<ConfigRowDataPacket[]>(sql, [name]);
+    const [configs] = await db.query<ConfigRowDataPacket[]>(sql, [name]);
 
     return configs[0];
 }

@@ -24,7 +24,7 @@ describe("Info Routes", () => {
 
     describe("/api/v1/info/users", () => {
         describe("GET request", () => {
-            it("should return all users", () => {
+            it("should return all users", (done) => {
                 request(app)
                     .get("/api/v1/info/users")
                     .set("Accept", "application/json")
@@ -39,9 +39,8 @@ describe("Info Routes", () => {
                         }),
                     })
                     .end((err) => {
-                        if (err) {
-                            throw err;
-                        }
+                        if (err) return done(err);
+                        done();
                     });
             });
         });
@@ -49,7 +48,7 @@ describe("Info Routes", () => {
 
     describe("/api/v1/info/users/:id", () => {
         describe("GET request", () => {
-            it("should return user data given valid user ID", () => {
+            it("should return user data given valid user ID", (done) => {
                 const user: Partial<User> = structuredClone(fakeUsers[16]); // Random user
                 delete user.password;
                 user.signed_in = (user.signed_in) ? 1 : 0 as any;
@@ -64,12 +63,11 @@ describe("Info Routes", () => {
                         user: user,
                     })
                     .end((err) => {
-                        if (err) {
-                            throw err;
-                        }
+                        if (err) return done(err);
+                        done();
                     });
             });
-            it("should return 400 given non-number user ID", () => {
+            it("should return 400 given non-number user ID", (done) => {
                 const userId = "foo";
 
                 request(app)
@@ -81,12 +79,11 @@ describe("Info Routes", () => {
                         description: "User ID is not a number!",
                     })
                     .end((err) => {
-                        if (err) {
-                            throw err;
-                        }
+                        if (err) return done(err);
+                        done();
                     });
             });
-            it("should return 404 given non-existent user ID", () => {
+            it("should return 404 given non-existent user ID", (done) => {
                 const userId = 0;
 
                 request(app)
@@ -98,9 +95,8 @@ describe("Info Routes", () => {
                         description: `User of ID: ${userId} not found in table: users`,
                     })
                     .end((err) => {
-                        if (err) {
-                            throw err;
-                        }
+                        if (err) return done(err);
+                        done();
                     });
             });
         });
