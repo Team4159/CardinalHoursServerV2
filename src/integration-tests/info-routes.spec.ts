@@ -92,7 +92,7 @@ describe("Info Routes", () => {
                     .send()
                     .expect(404)
                     .expect({
-                        description: `User of ID: ${userId} not found in table: users`,
+                        description: "User not found!",
                     })
                     .end((err) => {
                         if (err) return done(err);

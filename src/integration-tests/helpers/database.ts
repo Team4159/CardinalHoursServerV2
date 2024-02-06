@@ -1,12 +1,15 @@
-import db from "../../database";
+import db, { tableSuffix } from "../../database";
 import Session from "../../models/Session.model";
 import User from "../../models/User.model";
 import fakeSessions from "../data/fakeSessions";
 import fakeUsers from "../data/fakeUsers";
 
+const usersTableName = "users" + tableSuffix;
+const sessionsTableName = "sessions" + tableSuffix;
+
 async function setupDatabase() {
     await db.query(`
-                CREATE TABLE users (
+                CREATE TABLE ${usersTableName} (
                     user_id INT(11) PRIMARY KEY AUTO_INCREMENT,
                     first_name VARCHAR(200) NOT NULL,
                     last_name VARCHAR(200) NOT NULL,
@@ -18,10 +21,10 @@ async function setupDatabase() {
             `);
 
     await db.query(`
-                CREATE TABLE sessions (
+                CREATE TABLE ${sessionsTableName} (
                     session_id INT(11) PRIMARY KEY AUTO_INCREMENT,
                     user_id INT(11),
-                    CONSTRAINT fk_session_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                    CONSTRAINT fk_session_user FOREIGN KEY (user_id) REFERENCES ${usersTableName}(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
                     start_time BIGINT(20) NOT NULL,
                     end_time BIGINT(20) NOT NULL,
                     amended BOOL NOT NULL
@@ -30,8 +33,8 @@ async function setupDatabase() {
 }
 
 async function cleanUpDatabase() {
-    await db.query("ALTER TABLE IF EXISTS sessions DROP FOREIGN KEY IF EXISTS fk_session_user"); // Drop foreign key constraint to allow truncating `users`
-    await db.query("DROP TABLE IF EXISTS users, sessions, configs");
+    await db.query(`ALTER TABLE IF EXISTS ${sessionsTableName} DROP FOREIGN KEY IF EXISTS fk_session_user`); // Drop foreign key constraint to allow truncating `users`
+    await db.query(`DROP TABLE IF EXISTS ${usersTableName}, ${sessionsTableName}, configs`);
 }
 
 async function resetTables() {
@@ -40,7 +43,7 @@ async function resetTables() {
 }
 
 async function resetUsersTable() {
-    await db.query("ALTER TABLE IF EXISTS sessions DROP FOREIGN KEY IF EXISTS fk_session_user"); // Drop foreign key constraint to allow truncating `users`
+    await db.query(`ALTER TABLE IF EXISTS ${sessionsTableName} DROP FOREIGN KEY IF EXISTS fk_session_user`); // Drop foreign key constraint to allow truncating `users`
 
     let usersParamList: any[][] = [];
     fakeUsers.forEach((user: User) => {
@@ -55,15 +58,15 @@ async function resetUsersTable() {
         ]);
     });
 
-    await db.query("TRUNCATE TABLE users");
+    await db.query(`TRUNCATE TABLE ${usersTableName}`);
 
-    const sql = `INSERT INTO users
+    const sql = `INSERT INTO ${usersTableName}
                 (user_id, first_name, last_name, password, signed_in, last_signed_in, total_time)
                 VALUES ?`;
     await db.query(sql, [usersParamList]);
 
 
-    await db.query("ALTER TABLE IF EXISTS sessions ADD CONSTRAINT fk_session_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE"); // Add back foreign key constraint
+    await db.query(`ALTER TABLE IF EXISTS ${sessionsTableName} ADD CONSTRAINT fk_session_user FOREIGN KEY (user_id) REFERENCES ${usersTableName} (user_id) ON DELETE CASCADE ON UPDATE CASCADE`); // Add back foreign key constraint
 }
 
 async function resetSessionsTable() {
@@ -78,9 +81,9 @@ async function resetSessionsTable() {
         ]);
     });
 
-    await db.query("TRUNCATE TABLE sessions");
+    await db.query(`TRUNCATE TABLE ${sessionsTableName}`);
 
-    const sql = `INSERT INTO sessions
+    const sql = `INSERT INTO ${sessionsTableName}
                 (session_id, user_id, start_time, end_time, amended)
                 VALUES ?`;
     await db.query(sql, [sessionsParamList]);

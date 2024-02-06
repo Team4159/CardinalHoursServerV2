@@ -32,7 +32,7 @@ router.get("/users/:id", async (req, res) => {
     } catch (err) {
         if (err instanceof RowNotFoundError) {
             return res.status(404).json({
-                description: err.message,
+                description: "User not found!",
             });
         }
 
