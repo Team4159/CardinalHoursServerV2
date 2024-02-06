@@ -36,25 +36,7 @@ async function cleanUpDatabase() {
 
 async function resetTables() {
     await resetUsersTable();
-    
-
-    let sessionsParamList: any[][] = [];
-    fakeSessions.forEach((session: Session) => {
-        sessionsParamList.push([
-            session.session_id,
-            session.user_id,
-            session.start_time,
-            session.end_time,
-            session.amended,
-        ]);
-    });
-
-    await db.query("TRUNCATE TABLE sessions");
-
-    const sql = `INSERT INTO sessions
-                (session_id, user_id, start_time, end_time, amended)
-                VALUES ?`;
-    await db.query(sql, [sessionsParamList]);
+    await resetSessionsTable();
 }
 
 async function resetUsersTable() {
@@ -82,6 +64,26 @@ async function resetUsersTable() {
 
 
     await db.query("ALTER TABLE IF EXISTS sessions ADD CONSTRAINT fk_session_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE"); // Add back foreign key constraint
+}
+
+async function resetSessionsTable() {
+    let sessionsParamList: any[][] = [];
+    fakeSessions.forEach((session: Session) => {
+        sessionsParamList.push([
+            session.session_id,
+            session.user_id,
+            session.start_time,
+            session.end_time,
+            session.amended,
+        ]);
+    });
+
+    await db.query("TRUNCATE TABLE sessions");
+
+    const sql = `INSERT INTO sessions
+                (session_id, user_id, start_time, end_time, amended)
+                VALUES ?`;
+    await db.query(sql, [sessionsParamList]);
 }
 
 export { setupDatabase, cleanUpDatabase, resetTables };
