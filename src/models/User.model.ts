@@ -1,42 +1,49 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
-import database from "../database";
+import db, { tableSuffix } from "../database";
 import { RowNotFoundError } from "../utils/errors";
+import updateBuilder from "../utils/update-builder";
 
-interface User extends RowDataPacket {
+const usersTableName = "users" + tableSuffix;
+
+interface User {
     user_id: number;
     first_name: string;
     last_name: string;
     password: string;
     signed_in: boolean;
-    last_signed_in: bigint;
-    total_time: bigint;
+    last_signed_in: number;
+    total_time: number;
 }
 
-async function getAllUsers(): Promise<User[]> {
-    const sql = "SELECT * FROM `users`";
-    const [users] = await database.query<User[]>(sql);
+interface UserRowDataPacket extends User, RowDataPacket {}
+
+async function getAllUsers(): Promise<UserRowDataPacket[]> {
+    const sql = `SELECT * FROM ${usersTableName}`;
+    const [users] = await db.query<UserRowDataPacket[]>(sql);
 
     return users;
 }
 
 async function getUserById(userId: number): Promise<User> {
-    const sql = "SELECT * FROM `users` WHERE user_id = ?";
-    const [users] = await database.query<User[]>(sql, [userId]);
+    const sql = `SELECT * FROM ${usersTableName} WHERE user_id = ?`;
+    const [users] = await db.query<UserRowDataPacket[]>(sql, [userId]);
 
     if (users.length < 1) {
-        throw new RowNotFoundError(`User of id: ${userId} not found in table: users`);
+        throw new RowNotFoundError(
+            `User of ID: ${userId} not found in table: ${usersTableName}`
+        );
     }
 
     return users[0];
 }
 
 async function getUserByPassword(password: string): Promise<User> {
-    const sql = "SELECT * FROM `users` WHERE password = ?";
-    const [users] = await database.query<User[]>(sql, [password]);
+    const sql = `SELECT * FROM ${usersTableName} WHERE password = ?`;
+    const [users] = await db.query<UserRowDataPacket[]>(sql, [password]);
 
     if (users.length < 1) {
-        throw new RowNotFoundError(`User of password: ${password} not found in table: users`);
+        throw new RowNotFoundError(`User not found in table: ${usersTableName}!`);
     }
 
     return users[0];
@@ -48,8 +55,8 @@ async function createUser(
     password: string
 ): Promise<User> {
     const sql =
-        "INSERT INTO `users` (first_name, last_name, password) VALUES (?, ?, ?); SELECT user_id, first_name, last_name FROM users where password = ?";
-    const [users] = await database.query<User[]>(sql, [
+        `INSERT INTO ${usersTableName} (first_name, last_name, password) VALUES (?, ?, ?); SELECT user_id, first_name, last_name FROM ${usersTableName} where password = ?`;
+    const [users] = await db.query<UserRowDataPacket[]>(sql, [
         first_name,
         last_name,
         password,
@@ -59,37 +66,24 @@ async function createUser(
     return users[0];
 }
 
-async function updateUserTotalTime(password: string): Promise<boolean> {
-    const sql =
-        "UPDATE users SET total_time = (SELECT SUM(CASE WHEN end_time - start_time < 43200000 THEN end_time - start_time ELSE 0 END) FROM sessions WHERE user_id = (SELECT user_id FROM users WHERE password = ?)); SELECT user_id, first_name, last_name from users where password = ?";
-    const [resHeader] = await database.query<ResultSetHeader>(sql, [
-        password,
-        password,
-    ]);
-
-    return resHeader.affectedRows == 1;
-}
-
-async function updateUserLastSignedIn(
-    password: string,
-    newValue: bigint
+async function updateUser(
+    user_id: number,
+    values: Partial<User>
 ): Promise<boolean> {
-    const sql =
-        "UPDATE `users` SET last_signed_in = ? WHERE password = ?; SELECT user_id, first_name, last_name, last_signed_in FROM `users` where password = ?";
-    const [resHeader] = await database.query<ResultSetHeader>(sql, [
-        newValue,
-        password,
-        password,
-    ]);
+    const update = updateBuilder(usersTableName, values, { user_id });
+    const [resHeader] = await db.query<ResultSetHeader>(
+        update.query,
+        update.params
+    );
 
-    return resHeader.affectedRows == 1;
+    return resHeader.affectedRows === 1;
 }
 
-async function deleteUserByPassword(password: string): Promise<boolean> {
-    const sql = "DELETE FROM `users` WHERE password = ?";
-    const [resHeader] = await database.query<ResultSetHeader>(sql, [password]);
+async function deleteUserByPassword(password: number): Promise<boolean> {
+    const sql = `DELETE FROM ${usersTableName} WHERE password = ?`;
+    const [resHeader] = await db.query<ResultSetHeader>(sql, [password]);
 
-    return resHeader.affectedRows == 1;
+    return resHeader.affectedRows === 1;
 }
 
 export default User;
@@ -98,7 +92,6 @@ export {
     getUserById,
     getUserByPassword,
     createUser,
-    updateUserTotalTime,
-    updateUserLastSignedIn,
+    updateUser,
     deleteUserByPassword,
 };

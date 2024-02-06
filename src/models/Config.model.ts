@@ -1,58 +1,65 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
-import database from "../database";
+import db, { tableSuffix } from "../database";
 import { RowNotFoundError } from "../utils/errors";
 
-interface Config extends RowDataPacket {
+const configsTableName = "configs" + tableSuffix;
+
+interface Config {
     name: string;
     value: string;
 }
 
+interface ConfigRowDataPacket extends Config, RowDataPacket {}
+
 async function getAllConfigs(): Promise<Config[]> {
-    const sql = "SELECT * FROM `configs`";
-    const [configs] = await database.query<Config[]>(sql);
+    const sql = `SELECT * FROM ${configsTableName}`;
+    const [configs] = await db.query<ConfigRowDataPacket[]>(sql);
 
     return configs;
 }
 
 async function getConfigByName(name: string): Promise<Config> {
-    const sql = "SELECT * FROM `configs` WHERE name = ?";
-    const [configs] = await database.query<Config[]>(sql, [name]);
+    const sql = `SELECT * FROM ${configsTableName} WHERE name = ?`;
+    const [configs] = await db.query<ConfigRowDataPacket[]>(sql, [name]);
 
     if (configs.length < 1) {
-        throw new RowNotFoundError(
-            `Row of name: ${name} not found in table: configs`
-        );
+        throw new RowNotFoundError(`Config not found in table: ${configsTableName}!`);
     }
 
     return configs[0];
 }
 
 async function createConfigs(
-    newConfigs: { name: string; value: string }[]
+    newConfigs: Config[]
 ): Promise<Config[]> {
     const sql =
-        "INSERT INTO `configs` (name, value) VALUES ? RETURNING name, value";
+        `INSERT INTO ${configsTableName} (name, value) VALUES ? RETURNING name, value`;
     const params = newConfigs.map((newConfig) => [
         newConfig.name,
         newConfig.value,
     ]);
-    const [configs] = await database.query<Config[]>(sql, [params]);
+    const [configs] = await db.query<ConfigRowDataPacket[]>(sql, [
+        params,
+    ]);
 
     return configs;
 }
 
 async function createConfig(name: string, value: string): Promise<Config> {
     const sql =
-        "INSERT INTO `configs` (name, value) VALUES (?, ?) RETURNING name, value";
-    const [configs] = await database.query<Config[]>(sql, [name, value]);
+        `INSERT INTO ${configsTableName} (name, value) VALUES (?, ?) RETURNING name, value`;
+    const [configs] = await db.query<ConfigRowDataPacket[]>(sql, [
+        name,
+        value,
+    ]);
 
     return configs[0];
 }
 
 async function updateConfig(name: string, newValue: string): Promise<boolean> {
-    const sql = "UPDATE `configs` SET value = ? WHERE name = ?";
-    const [resHeader] = await database.query<ResultSetHeader>(sql, [
+    const sql = `UPDATE ${configsTableName} SET value = ? WHERE name = ?`;
+    const [resHeader] = await db.query<ResultSetHeader>(sql, [
         newValue,
         name,
     ]);
@@ -60,9 +67,9 @@ async function updateConfig(name: string, newValue: string): Promise<boolean> {
     return resHeader.affectedRows > 0;
 }
 
-async function deleteConfig(name: string): Promise<Config> {
-    const sql = "DELETE FROM `configs` WHERE name = ? RETURNING name, value";
-    const [configs] = await database.query<Config[]>(sql, [name]);
+async function deleteConfigByName(name: string): Promise<Config> {
+    const sql = `DELETE FROM ${configsTableName} WHERE name = ? RETURNING name, value`;
+    const [configs] = await db.query<ConfigRowDataPacket[]>(sql, [name]);
 
     return configs[0];
 }
@@ -74,5 +81,5 @@ export {
     createConfigs,
     createConfig,
     updateConfig,
-    deleteConfig,
+    deleteConfigByName,
 };

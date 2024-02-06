@@ -11,17 +11,17 @@ router.get("/users", async (req, res) => {
     users.map((user: any) => {delete user.password}); // Remove password field
 
     return res.status(200).json({
-        description: "Returning all users",
+        description: "Returning all users!",
         users: users,
     })
 });
 
 // Return user_id, first_name, last_name, signed_in, last_signed_in, total_time of user with given valid ID
 router.get("/users/:id", async (req, res) => {
-    // Is user ID valid?
+    // Is user ID a number?
     if (isNaN(Number(req.params.id))) {
-        return res.status(404).json({
-            description: `User of id: ${req.params.id} not found`,
+        return res.status(400).json({
+            description: "User ID is not a number!",
         });
     }
 
@@ -32,7 +32,7 @@ router.get("/users/:id", async (req, res) => {
     } catch (err) {
         if (err instanceof RowNotFoundError) {
             return res.status(404).json({
-                description: err.message,
+                description: "User not found!",
             });
         }
 
@@ -43,7 +43,7 @@ router.get("/users/:id", async (req, res) => {
     delete (user as any).password; // Remove password field
     
     return res.status(200).json({
-        description: "User found",
+        description: "User found!",
         user: user,
     }); 
 });
