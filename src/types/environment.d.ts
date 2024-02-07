@@ -4,6 +4,8 @@ declare namespace NodeJS {
 
         PORT: number;
 
+        HOURS_SPREADSHEET_ID: string;
+
         DB_HOST: string;
         DB_USER: string;
         DB_PASS: string;

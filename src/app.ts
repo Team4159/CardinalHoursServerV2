@@ -19,4 +19,4 @@ app.listen(process.env.PORT, () => {
     logger.info(`Listening on port ${process.env.PORT}!`);
 });
 
-export default app; // For e2e testing
+export default app; // For integration testing
