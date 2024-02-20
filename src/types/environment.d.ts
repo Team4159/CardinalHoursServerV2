@@ -3,6 +3,8 @@ declare namespace NodeJS {
         NODE_ENV: "production" | "development" | "testing";
 
         PORT: number;
+        
+        DEFAULT_EXP_BACKOFF_MAX_ATTEMPTS: number;
 
         HOURS_SPREADSHEET_ID: string;
 

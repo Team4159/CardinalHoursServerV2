@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getAllUsers, getUserById } from "../../models/User.model";
+import User, { getAllUsers, getUserById } from "../../models/User.model";
 import { RowNotFoundError } from "../../utils/errors";
 
 const router = express.Router();
@@ -8,7 +8,7 @@ const router = express.Router();
 // Returns user_id, first_name, last_name, signed_in, last_signed_in, total_time for all users
 router.get("/users", async (req, res) => {
     const users = await getAllUsers();
-    users.map((user: any) => {delete user.password}); // Remove password field
+    users.map((user: Partial<User>) => {delete user.password}); // Remove password field
 
     return res.status(200).json({
         description: "Returning all users!",
@@ -25,7 +25,7 @@ router.get("/users/:id", async (req, res) => {
         });
     }
 
-    let user;
+    let user: Partial<User>;
 
     try {
         user = await getUserById(Number(req.params.id));
@@ -39,8 +39,7 @@ router.get("/users/:id", async (req, res) => {
         return res.sendStatus(500);
     }
 
-
-    delete (user as any).password; // Remove password field
+    delete user.password; // Remove password field
     
     return res.status(200).json({
         description: "User found!",

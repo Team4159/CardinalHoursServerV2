@@ -1,10 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import { describe, it, before, beforeEach, after } from "mocha";
 import request from "supertest";
 
 import app from "../app";
-import User, { getUserById } from "../models/User.model";
+import User from "../models/User.model";
 import fakeUsers from "./data/fakeUsers";
 import { cleanUpDatabase, resetTables, setupDatabase } from "./helpers/database";
 import fakeSessions from "./data/fakeSessions";
