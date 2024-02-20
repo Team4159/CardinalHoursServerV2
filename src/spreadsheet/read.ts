@@ -1,10 +1,10 @@
-import Cell from "./cell";
+import { Cell, CellRangeBounded } from "./cell";
 import { RangeNotFound } from "../utils/errors";
-import { getSheets } from "./sheets";
+import { getSheetNameById, getSheets } from "./sheets";
 
-async function readCell(spreadsheetId: string, sheetName: string, cell: Cell): Promise<string> {
+async function readCell(spreadsheetId: string, sheetId: number, cell: Cell): Promise<string> {
     const sheets = await getSheets();
-    const range = `${sheetName}!${cell.column}${cell.row}`
+    const range = `${await getSheetNameById(spreadsheetId, sheetId)}!${cell.column}${cell.row}`
     const cells = (await sheets.spreadsheets.values.get({
         spreadsheetId,
         range,
@@ -18,17 +18,17 @@ async function readCell(spreadsheetId: string, sheetName: string, cell: Cell): P
     return cells[0][0];
 }
 
-async function readCellRange(spreadsheetId: string, sheetName: string, cell1: Cell, cell2: Cell): Promise<string[][]> {
+async function readCellRange(spreadsheetId: string, sheetId: number, range: CellRangeBounded): Promise<string[][]> {
     const sheets = await getSheets();
-    const range = `${sheetName}!${cell1.column}${cell1.row}:${cell2.column}${cell2.row}`
+    const rangeString = `${await getSheetNameById(spreadsheetId, sheetId)}!${range.start.column}${range.start.row}:${range.end.column}${range.end.row}`
     const cells = (await sheets.spreadsheets.values.get({
-        spreadsheetId: spreadsheetId,
-        range,
+        spreadsheetId,
+        range: rangeString,
         majorDimension: "ROWS",
     })).data.values;
 
     if (!cells) {
-        throw new RangeNotFound("No cells found in range", range);
+        throw new RangeNotFound("No cells found in range", rangeString);
     }
 
     return cells;

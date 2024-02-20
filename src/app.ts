@@ -7,9 +7,8 @@ require("express-async-errors"); // Adds error handling for async functions, unn
 import logger from "./utils/logger";
 import api from "./api";
 import middleware from "./utils/middleware";
-import { writeCell } from "./spreadsheet/write";
-import Cell from "./spreadsheet/cell";
-import { getSheets } from "./spreadsheet/sheets";
+import { Cell, CellRangeBounded } from "./spreadsheet/cell";
+import { readCell, readCellRange } from "./spreadsheet/read";
 
 const app = express();
 
@@ -21,7 +20,5 @@ app.use("/api/v1", api);
 app.listen(process.env.PORT, () => {
     logger.info(`Listening on port ${process.env.PORT}!`);
 });
-
-writeCell(process.env.HOURS_SPREADSHEET_ID, 0, new Cell("A", 1), "Test"); // TODO FIX ERROR
 
 export default app; // For integration testing

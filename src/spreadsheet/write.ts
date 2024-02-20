@@ -1,7 +1,7 @@
-import Cell, { CellValue, getEffectiveValue, letterToColumn } from "./cell";
+import { Cell, CellValue, CellRange, getUserEnteredValue, letterToColumn, parseCells } from "./cell";
 import { getSheets } from "./sheets";
 
-async function writeCell<T extends CellValue>(spreadsheetId: string, sheetId: number, cell: Cell, data: T) {
+async function writeCell(spreadsheetId: string, sheetId: number, cell: Cell, data: CellValue) {
     const sheets = await getSheets();
     const response = await sheets.spreadsheets.batchUpdate({
         spreadsheetId,
@@ -13,25 +13,53 @@ async function writeCell<T extends CellValue>(spreadsheetId: string, sheetId: nu
                             {
                                 values: [
                                     {
-                                        effectiveValue: getEffectiveValue(data),
+                                        userEnteredValue: getUserEnteredValue(data),
                                     }
                                 ]
                             }
                         ],
-                        range: {
+                        start: {
                             sheetId,
-                            startRowIndex: cell.row,
-                            startColumnIndex: letterToColumn(cell.column),
-                        }
+                            rowIndex: cell.row - 1, // Since first row starts at 0
+                            columnIndex: letterToColumn(cell.column),
+                        },
+                        fields: "*",
                     }
                 }
             ]
         }
     });
+
+    return response;
 }
 
-// TODO: ADD WRITE CELL RANGE
+async function writeCellRange(spreadsheetId: string, sheetId: number, range: CellRange, data: CellValue[][]) {
+    const sheets = await getSheets();
+    const response = await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+            requests: [
+                {
+                    updateCells: {
+                        rows: parseCells(data),
+                        range: {
+                            sheetId,
+                            startRowIndex: range.start.row - 1, // Since first row starts at 0
+                            startColumnIndex: letterToColumn(range.start.column),
+                            endRowIndex: range.end ? range.end.row : undefined, // If range.end exists
+                            endColumnIndex: range.end ? letterToColumn(range.end.column + 1) : undefined,
+                        },
+                        fields: "*",
+                    }
+                }
+            ]
+        }
+    });
+
+    return response;
+}
 
 export {
     writeCell,
+    writeCellRange
 }

@@ -1,4 +1,4 @@
-import { sheets_v4 } from "@googleapis/sheets";
+import { sheets_v4 } from "googleapis";
 
 type CellValue = number | string | boolean;
 
@@ -12,7 +12,27 @@ class Cell {
     }
 }
 
-function getEffectiveValue<T extends CellValue>(data: T): sheets_v4.Schema$ExtendedValue {
+class CellRange {
+    readonly start: Cell;
+    readonly end?: Cell;
+
+    constructor(start: Cell, end?: Cell) {
+        this.start = start;
+        this.end = end;
+    }
+}
+
+class CellRangeBounded extends CellRange {
+    override readonly end: Cell;
+
+    constructor(start: Cell, end: Cell) {
+        super(start, end);
+
+        this.end = end;
+    }
+}
+
+function getUserEnteredValue(data: CellValue): sheets_v4.Schema$ExtendedValue {
     let effectiveValue: sheets_v4.Schema$ExtendedValue;
 
     switch (typeof data) {
@@ -32,12 +52,29 @@ function getEffectiveValue<T extends CellValue>(data: T): sheets_v4.Schema$Exten
             };
             break;
         default:
-            throw new Error();
+            throw new TypeError("Data is not number, string, or boolean!");
     }
 
     return effectiveValue;
 }
 
+function parseCells(data: CellValue[][]): sheets_v4.Schema$RowData[] { // TODO: Make more clear
+    let cells: sheets_v4.Schema$RowData[] = [];
+
+    data.forEach((row) => {
+        cells.push({
+            values: row.map((value): sheets_v4.Schema$CellData => {
+                return {
+                    userEnteredValue: getUserEnteredValue(value),
+                };
+            }),
+        });
+    });
+
+    return cells;
+}
+
+// https://stackoverflow.com/a/21231012
 function columnToLetter(column: number): string {
     column++;
 
@@ -52,6 +89,7 @@ function columnToLetter(column: number): string {
     return letter;
 }
 
+// https://stackoverflow.com/a/21231012
 function letterToColumn(letter: string): number {
     var column = 0,
         length = letter.length;
@@ -61,10 +99,13 @@ function letterToColumn(letter: string): number {
     return --column;
 }
 
-export default Cell;
 export {
+    Cell,
     CellValue,
-    getEffectiveValue,
+    CellRange,
+    CellRangeBounded,
+    getUserEnteredValue,
+    parseCells,
     columnToLetter,
     letterToColumn,
 }
