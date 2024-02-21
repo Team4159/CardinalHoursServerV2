@@ -23,8 +23,6 @@ if (process.env.NODE_ENV === "testing") {
     }).promise();
 }
 
-console.log(tableSuffix)
-
 export default db;
 export {
     tableSuffix,

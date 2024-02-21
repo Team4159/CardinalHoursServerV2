@@ -1,6 +1,8 @@
 {
   "extends": "./basic.tsconfig.json",
+  "exclude": [],
   "compilerOptions": {
-    "outDir": "./test/"
+    "outDir": "./test/",
+    "types": ["mocha", "node"]
   }
 }

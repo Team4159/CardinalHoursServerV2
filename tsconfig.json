@@ -1,28 +1,26 @@
 {
-  "include": [
-    "src/**/*"
-  ],
-  "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
-    "rootDir": "./src/",
-    "typeRoots": [
-      "src/types/"
-    ],
-    "removeComments": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true, 
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "useUnknownInCatchVariables": true,
-    "alwaysStrict": true,
-    "noImplicitReturns": true,
-    "noImplicitOverride": true,
-    "skipLibCheck": true
-  }
+    "include": ["src/**/*"],
+    "exclude": ["src/tests/**/*", "src/integration-tests/**/*"],
+    "compilerOptions": {
+        "target": "es2016",
+        "module": "commonjs",
+        "rootDir": "./src/",
+        "types": ["node"],
+        "typeRoots": ["src/types/", "node_modules/@types"],
+        "removeComments": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictBindCallApply": true,
+        "strictPropertyInitialization": true,
+        "noImplicitThis": true,
+        "useUnknownInCatchVariables": true,
+        "alwaysStrict": true,
+        "noImplicitReturns": true,
+        "noImplicitOverride": true,
+        "skipLibCheck": true
+    }
 }
